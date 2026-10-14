@@ -136,7 +136,7 @@ footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-s
 
   <section class="sub" aria-labelledby="subTitle">
     <h2 id="subTitle">Get the question of the day by email</h2>
-    <p class="subtext">One question at 7am, UK time. Hints and the answer stay on the site, so you try it yourself first. Unsubscribe from any email.</p>
+    <p class="subtext">One question at 7am, UK time. Hints and the answer stay on the site, so you try it yourself first. Unsubscribe from any email. New emails sometimes land in spam at first, so check there if nothing arrives.</p>
     <form id="subForm" novalidate>
       <label for="subEmail" class="sr">Email address</label>
       <input id="subEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
@@ -263,7 +263,7 @@ $("subForm").addEventListener("submit", async e=>{
   try{
     const r = await fetch("/api/subscribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email, website:$("subHp").value})});
     const j = await r.json().catch(()=>({}));
-    msg.textContent = r.ok ? "Check your inbox and tap the confirm link to start." : (j.error || "Something went wrong. Try again in a minute.");
+    msg.textContent = r.ok ? "Check your inbox and tap the confirm link to start. If it hasn't arrived in a minute or two, look in your spam folder and mark it as not spam." : (j.error || "Something went wrong. Try again in a minute.");
     if(r.ok) $("subForm").reset();
   }catch(err){ msg.textContent = "Couldn't reach the server. Check your connection and try again."; }
   $("subBtn").disabled = false;
