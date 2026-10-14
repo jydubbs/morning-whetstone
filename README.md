@@ -13,7 +13,7 @@ AI tools are being used for things we once did by ourselves like summarise my re
 ## Features
 
 - **Question of the day.** Everyone gets the same question each day, chosen from a bank of 287.
-- **Nine themes.** Mental maths, logic puzzles, memory and recall, explain it yourself, arguing both sides, writing under constraints, pattern spotting, word play and real-world problems. Pick a theme, or randomise.
+- **Nine themes.** Mental maths, logic puzzles, memory and recall, explain it yourself, arguing both sides, writing under constraints, pattern spotting, word play and real-world problems. Pick a theme, or randomise. The questions were made to be answered within 10 minutes, and the complexity of questions ranges from easy (done within 1 minute) to hard (over 5 minutes), so you will never know what to expect every morning.
 - **10-minute timer** with a soft chime, and space to write out your working.
 - **Up to three hints**, revealed one at a time, then the answer. Revealing the answer early takes a second tap.
 - **Daily email at 7am UK time.** Sign up with an email address, confirm it, and the question arrives each morning. The email contains only the question, and the hints and answer stay on the site.
