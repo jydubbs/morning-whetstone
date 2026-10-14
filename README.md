@@ -6,9 +6,9 @@
 
 ![Morning Whetstone screenshot](docs/screenshot.png)
 
-## Why I built it
+## Motivation
 
-AI tools now draft my writing, summarise my reading and help me make decisions. That's useful, but I noticed I was reaching for them before thinking things through myself. Morning Whetstone is a small daily habit to push back on that: one question, ten minutes, no searching, before the day starts.
+AI tools are being used for things we once did by ourselves like summarise my reading, editing my writing, and helping me make decisions. That's useful, but I noticed I was reaching for them before thinking things through myself. Morning Whetstone is a small daily habit to push back on that by asking one question that scratches your brain, for a maximum of 10 minutes, no searching and no AI, before the day starts.
 
 ## Features
 
@@ -16,7 +16,7 @@ AI tools now draft my writing, summarise my reading and help me make decisions. 
 - **Nine themes.** Mental maths, logic puzzles, memory and recall, explain it yourself, arguing both sides, writing under constraints, pattern spotting, word play and real-world problems. Pick a theme, or randomise.
 - **10-minute timer** with a soft chime, and space to write out your working.
 - **Up to three hints**, revealed one at a time, then the answer. Revealing the answer early takes a second tap.
-- **Daily email at 7am UK time.** Sign up with an email address, confirm it, and the question arrives each morning. The email contains only the question, so the hints and answer stay on the site.
+- **Daily email at 7am UK time.** Sign up with an email address, confirm it, and the question arrives each morning. The email contains only the question, and the hints and answer stay on the site.
 - **Streak counter** to track consecutive mornings.
 - **Installable on a phone** like an app, and works offline after the first visit.
 - **Light and dark mode**, with a quiet, paper-like design inspired by Japanese and Scandinavian minimalism.
@@ -52,11 +52,11 @@ Cron trigger (daily) ──► Worker ──► picks today's question ──►
 
 ## How it was made
 
-I built this with Claude, Anthropic's AI assistant. It's a deliberately honest irony: a tool against over-relying on AI, made with AI.
+I built this with Claude. It's a bit of an irony: a tool against over-relying on AI, made with AI.
 
 **My part:** the idea; choosing and refining the question themes; the design direction; deciding the features (hints, timer, daily email); buying and configuring the domain, including the DNS records for email authentication; and deploying to Cloudflare with automatic deploys from GitHub.
 
-**Claude's part:** writing most of the code and drafting the question bank, which I reviewed.
+**Claude's part:** writing most of the code and drafting the question bank, which I reviewed and revised.
 
 ## Project structure
 
