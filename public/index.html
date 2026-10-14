@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A ten-minute thinking question every morning. Pick a theme or randomise, use up to three hints, then check the answer.">
+<meta name="theme-color" content="#ECEAE5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#18191B" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Morning Whetstone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: one quiet column, like a single sheet of washi on a desk. Question is the only loud thing. */
+:root{
+  --paper:#ECEAE5; --sheet:#F6F5F1; --ink:#2A2927; --muted:#76726A; --line:#D5D1C8; --accent:#2F4A6B; --accent-soft:#DDE3EA;
+  --f-display:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",Georgia,serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#18191B; --sheet:#202124; --ink:#E5E2DB; --muted:#9A968E; --line:#34353A; --accent:#93AACB; --accent-soft:#2A3240; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#18191B; --sheet:#202124; --ink:#E5E2DB; --muted:#9A968E; --line:#34353A; --accent:#93AACB; --accent-soft:#2A3240; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.7;padding:0 16px}
+.wrap{max-width:680px;margin:0 auto;padding-block:40px 64px;display:flex;flex-direction:column;gap:32px}
+
+header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:14px}
+.brand{display:flex;align-items:baseline;gap:12px}
+.brand .mark{font-family:var(--f-display);font-size:22px;color:var(--accent)}
+.brand h1{font-family:var(--f-display);font-weight:600;font-size:20px;margin:0;letter-spacing:.02em}
+.meta{font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+
+.label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+.themes{display:flex;flex-wrap:wrap;gap:8px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chip{background:transparent;border:1px solid var(--line);border-radius:2px;padding:5px 12px;font-size:13px;color:var(--ink);transition:background .2s,border-color .2s}
+.chip:hover{border-color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.chip.rand{border-style:dashed;color:var(--accent);border-color:var(--accent)}
+.chip.rand[aria-pressed="true"]{background:var(--accent);color:var(--paper);border-style:solid}
+
+.sheet{background:var(--sheet);border:1px solid var(--line);padding:32px clamp(20px,5vw,44px);display:flex;flex-direction:column;gap:26px}
+.qhead{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.question{font-family:var(--f-display);font-size:clamp(20px,3.6vw,25px);line-height:1.6;margin:0;white-space:pre-line;text-wrap:pretty}
+
+.timer{display:flex;flex-direction:column;gap:10px}
+.trow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.clock{font-size:40px;font-weight:400;font-variant-numeric:tabular-nums;letter-spacing:.04em;line-height:1}
+.clock.done{color:var(--accent)}
+.bar{height:2px;background:var(--line);position:relative;overflow:hidden}
+.bar span{position:absolute;inset:0 auto 0 0;background:var(--accent);width:0;transition:width 1s linear}
+.tbtns{display:flex;gap:8px}
+.btn{background:transparent;border:1px solid var(--ink);padding:7px 18px;font-size:13px;border-radius:2px}
+.btn.primary{background:var(--ink);color:var(--sheet)}
+.btn.ghost{border-color:var(--line);color:var(--muted)}
+.btn:hover{opacity:.85}
+
+textarea{width:100%;min-height:120px;resize:vertical;background:transparent;border:none;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 0;font:inherit;color:var(--ink);line-height:1.8;
+  background-image:repeating-linear-gradient(transparent 0 26px,var(--line) 26px 27px);background-position:0 12px;background-attachment:local}
+textarea::placeholder{color:var(--muted)}
+
+.help{display:flex;flex-direction:column;gap:12px}
+.hbtns{display:flex;flex-wrap:wrap;gap:8px}
+.hint,.answer{border-left:2px solid var(--accent);padding:2px 0 2px 14px;margin:0;white-space:pre-line}
+.hint b,.answer b{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.answer{border-left-color:var(--ink);background:var(--accent-soft);padding:12px 14px}
+.btn[disabled]{opacity:.35;cursor:default}
+
+.chip.today{font-weight:700}
+.sub{border-top:1px solid var(--line);padding-top:24px;display:flex;flex-direction:column;gap:10px}
+.sub h2{font-family:var(--f-display);font-weight:600;font-size:18px;margin:0;text-wrap:balance}
+.subtext{margin:0;color:var(--muted);font-size:13px;max-width:60ch}
+#subForm{display:flex;gap:8px;flex-wrap:wrap}
+#subEmail{flex:1 1 220px;min-width:0;font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var(--line);border-radius:2px;padding:7px 12px}
+#subEmail:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.submsg{margin:0;font-size:13px;min-height:1.7em}
+.sr,.hp{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.next{background:none;border:none;border-bottom:1px solid var(--muted);padding:0;color:var(--ink);font-size:13px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)} body{margin:0}</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="mark" aria-hidden="true">砥</span><h1>Morning Whetstone</h1></div>
+    <span class="meta" id="meta"></span>
+  </header>
+
+  <section>
+    <p class="label">Choose a theme</p>
+    <div class="themes" id="themes"></div>
+  </section>
+
+  <article class="sheet" aria-live="polite">
+    <div class="qhead"><span id="qtheme"></span><span id="qcount"></span></div>
+    <p class="question" id="question"></p>
+
+    <div class="timer">
+      <div class="trow">
+        <span class="clock" id="clock">10:00</span>
+        <div class="tbtns">
+          <button class="btn primary" id="startBtn">Start</button>
+          <button class="btn ghost" id="resetBtn">Reset</button>
+        </div>
+      </div>
+      <div class="bar"><span id="bar"></span></div>
+    </div>
+
+    <textarea id="notes" placeholder="Work it out here. Your own words, no searching."></textarea>
+
+    <div class="help">
+      <div class="hbtns">
+        <button class="btn ghost" id="hintBtn">Hint 1 of 3</button>
+        <button class="btn ghost" id="ansBtn">Show answer</button>
+      </div>
+      <div id="hints" class="help"></div>
+      <div id="ans"></div>
+    </div>
+  </article>
+
+  <footer>
+    <span id="streak"></span>
+    <button class="next" id="nextBtn">Another question</button>
+  </footer>
+
+  <section class="sub" aria-labelledby="subTitle">
+    <h2 id="subTitle">Get the question of the day by email</h2>
+    <p class="subtext">One question at 7am, UK time. Hints and the answer stay on the site, so you try it yourself first. Unsubscribe from any email.</p>
+    <form id="subForm" novalidate>
+      <label for="subEmail" class="sr">Email address</label>
+      <input id="subEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+      <input id="subHp" name="website" type="text" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+      <button class="btn primary" id="subBtn" type="submit">Subscribe</button>
+    </form>
+    <p class="submsg" id="subMsg" role="status"></p>
+  </section>
+</div>
+
+<script type="module">
+import { BANK, THEMES, questionOfTheDay, londonDate } from "./questions.js";
+const RANDOM = "Randomise";
+const TODAY = "Today";
+const TOTAL = 600;
+
+const $ = id => document.getElementById(id);
+const store = {
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+
+const params = new URLSearchParams(location.search);
+let mode = store.get("mw-mode", TODAY);
+if(params.get("q")==="today") mode = TODAY;
+if(mode!==RANDOM && mode!==TODAY && !BANK[mode]) mode = TODAY;
+let current = null, hintsShown = 0, ansArmed = false;
+let remaining = TOTAL, ticking = null;
+
+// header date
+$("meta").textContent = new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+
+// theme chips
+const themesEl = $("themes");
+[TODAY, RANDOM, ...THEMES].forEach(t=>{
+  const b=document.createElement("button");
+  b.className="chip"+(t===RANDOM?" rand":"")+(t===TODAY?" today":"");
+  b.textContent=t; b.dataset.t=t;
+  b.onclick=()=>{mode=t;store.set("mw-mode",t);markChips();pick();};
+  themesEl.appendChild(b);
+});
+function markChips(){themesEl.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c.dataset.t===mode))}
+
+function pick(){
+  if(mode===TODAY){ current = {...questionOfTheDay(), daily:true}; render(); return; }
+  const seen = store.get("mw-seen", {});
+  const theme = mode===RANDOM ? THEMES[Math.floor(Math.random()*THEMES.length)] : mode;
+  const list = BANK[theme];
+  let used = seen[theme] || [];
+  let pool = list.map((_,i)=>i).filter(i=>!used.includes(i) && !(current && current.theme===theme && current.i===i));
+  if(!pool.length){used=[];pool=list.map((_,i)=>i).filter(i=>!(current && current.theme===theme && current.i===i));}
+  const i = pool[Math.floor(Math.random()*pool.length)];
+  used.push(i); seen[theme]=used; store.set("mw-seen",seen);
+  current = {theme,i,...list[i]};
+  render();
+}
+
+function render(){
+  $("qtheme").textContent = current.theme;
+  $("qcount").textContent = current.daily ? "Question of the day" : `${current.i+1} / ${BANK[current.theme].length}`;
+  $("nextBtn").textContent = current.daily ? "Try another question" : "Another question";
+  $("question").textContent = current.q;
+  $("notes").value = "";
+  hintsShown = 0; ansArmed=false;
+  $("hints").innerHTML=""; $("ans").innerHTML="";
+  updateHelp();
+  resetTimer();
+}
+
+function updateHelp(){
+  const hb=$("hintBtn");
+  if(hintsShown>=3){hb.textContent="No more hints";hb.disabled=true;}
+  else{hb.textContent=`Hint ${hintsShown+1} of 3`;hb.disabled=false;}
+  const ab=$("ansBtn");
+  ab.textContent = ansArmed ? "Sure? Tap again to reveal" : "Show answer";
+  ab.disabled = !!$("ans").innerHTML;
+}
+$("hintBtn").onclick=()=>{
+  if(hintsShown>=3)return;
+  const p=document.createElement("p");p.className="hint";
+  p.innerHTML=`<b>Hint ${hintsShown+1}</b>`;p.appendChild(document.createTextNode(current.h[hintsShown]));
+  $("hints").appendChild(p);hintsShown++;updateHelp();
+};
+$("ansBtn").onclick=()=>{
+  if(!ansArmed && remaining>0){ansArmed=true;updateHelp();return;}
+  const p=document.createElement("p");p.className="answer";
+  p.innerHTML="<b>Answer</b>";p.appendChild(document.createTextNode(current.a));
+  $("ans").appendChild(p);ansArmed=false;pause();logDone();updateHelp();
+};
+
+// timer
+function fmt(s){return `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`}
+function drawClock(){
+  $("clock").textContent=fmt(remaining);
+  $("clock").classList.toggle("done",remaining===0);
+  $("bar").style.width=`${((TOTAL-remaining)/TOTAL)*100}%`;
+}
+function start(){
+  if(remaining===0)return;
+  ticking=setInterval(()=>{
+    remaining--;drawClock();
+    if(remaining<=0){pause();chime();$("clock").textContent="Time";logDone();}
+  },1000);
+  $("startBtn").textContent="Pause";
+}
+function pause(){clearInterval(ticking);ticking=null;$("startBtn").textContent=remaining===0?"Done":"Start";}
+function resetTimer(){pause();remaining=TOTAL;drawClock();$("startBtn").textContent="Start";}
+$("startBtn").onclick=()=>ticking?pause():start();
+
+// email subscription
+const msg = $("subMsg");
+const notices = {
+  subscribed: "You're subscribed. Your first question arrives tomorrow at 7am.",
+  unsubscribed: "You've been unsubscribed. No more emails.",
+  invalid: "That link has expired or was already used."
+};
+const status = params.get("status");
+if(notices[status]){ msg.textContent = notices[status]; history.replaceState(null,"",location.pathname); }
+$("subForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const email = $("subEmail").value.trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ msg.textContent = "Enter a full email address, like you@example.com."; return; }
+  $("subBtn").disabled = true; msg.textContent = "Sending…";
+  try{
+    const r = await fetch("/api/subscribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email, website:$("subHp").value})});
+    const j = await r.json().catch(()=>({}));
+    msg.textContent = r.ok ? "Check your inbox and tap the confirm link to start." : (j.error || "Something went wrong. Try again in a minute.");
+    if(r.ok) $("subForm").reset();
+  }catch(err){ msg.textContent = "Couldn't reach the server. Check your connection and try again."; }
+  $("subBtn").disabled = false;
+});
+$("resetBtn").onclick=resetTimer;
+$("nextBtn").onclick=()=>{ if(mode===TODAY){mode=RANDOM;store.set("mw-mode",mode);markChips();} pick(); };
+
+function chime(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    [523.25,783.99].forEach((f,k)=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type="sine";o.frequency.value=f;o.connect(g);g.connect(ctx.destination);
+      const t=ctx.currentTime+k*0.35;
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.18,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+1.6);
+      o.start(t);o.stop(t+1.7);
+    });
+  }catch(e){}
+}
+
+// practice log: count distinct days
+function logDone(){
+  const days=store.get("mw-days",[]);const today=londonDate();
+  if(!days.includes(today)){days.push(today);store.set("mw-days",days);}
+  showStreak();
+}
+function showStreak(){
+  const days=new Set(store.get("mw-days",[]));
+  let n=0;const d=new Date();
+  if(!days.has(londonDate(d))) d.setDate(d.getDate()-1);
+  while(days.has(londonDate(d))){n++;d.setDate(d.getDate()-1);}
+  $("streak").textContent = n ? `${n} morning${n>1?"s":""} in a row` : `${days.size} mornings practised`;
+}
+
+markChips();showStreak();pick();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+</script>
+
+</body>
+</html>

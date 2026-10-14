@@ -1,0 +1,30 @@
+name = "morning-whetstone"
+main = "src/worker.js"
+compatibility_date = "2025-09-01"
+
+# The website itself
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+
+# Subscriber list. Replace database_id with the ID printed by:
+#   npx wrangler d1 create whetstone
+[[d1_databases]]
+binding = "DB"
+database_name = "whetstone"
+database_id = "453af32e-5a99-4873-b634-3aa19485e0ed"
+
+# Runs at 05:00 and 06:00 UTC. The code only sends on the one that is 7am in London,
+# so the email arrives at 7am all year round (GMT and BST).
+[triggers]
+crons = ["0 5 * * *", "0 6 * * *"]
+
+[vars]
+# Your live site address, no trailing slash
+SITE_URL = "https://brain-whetstone.fun"
+# Must be an address on a domain you've verified with Resend
+FROM_EMAIL = "Morning Whetstone <question@brain-whetstone.fun>"
+
+# The Resend API key is a secret, not set here. Add it with:
+#   npx wrangler secret put RESEND_API_KEY
