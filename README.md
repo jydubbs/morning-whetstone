@@ -122,6 +122,7 @@ npm run dev
 
 ## Ideas for later
 
+- **AI answer feedback.** After you've written your own answer, an LLM reviews it against the model answer and comments on your reasoning: what you got right, where your logic slipped, and one thing to try next time. It would never give hints or the answer before you've attempted it, so the thinking stays yours.
 - A biology and bioinformatics theme
 - Difficulty levels
 - Streaks that follow you across devices
