@@ -51,7 +51,8 @@ async function subscribe(request, env) {
     subject: "Confirm your Morning Whetstone subscription",
     html: shell(`<p style="margin:0 0 16px">Tap below to start getting one thinking question every morning at 7am.</p>
       ${button(link, "Confirm my subscription")}
-      <p style="margin:24px 0 0;color:#76726A;font-size:13px">If you didn't sign up, ignore this email and you won't hear from us again.</p>`),
+      <p style="margin:24px 0 0;color:#76726A;font-size:13px">Tip: add ${esc(env.FROM_EMAIL.replace(/.*<|>.*/g, ""))} to your contacts so the daily question lands in your inbox, not spam.</p>
+      <p style="margin:12px 0 0;color:#76726A;font-size:13px">If you didn't sign up, ignore this email and you won't hear from us again.</p>`),
     text: `Confirm your subscription to Morning Whetstone:\n${link}\n\nIf you didn't sign up, ignore this email.`,
   }]);
   return json({ ok: true });
