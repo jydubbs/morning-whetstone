@@ -1,87 +1,128 @@
-# Morning Whetstone
+# 砥 Morning Whetstone
 
-A ten-minute thinking question every morning, on the website and by email.
+**A ten-minute thinking question every morning, to keep your own reasoning sharp when AI does so much of the thinking for us.**
 
-- **Website**: pick a theme, randomise, or do **Today's** question. Everyone gets the same question of the day.
-- **Email**: visitors enter their email, confirm it, and get the question of the day at **7am UK time** (all year, GMT and BST). The email has the question only; the timer, hints and answer are on the site.
-- **Unsubscribe**: a link in every email, plus the one-click "Unsubscribe" button in Gmail and Apple Mail.
+🔗 **Live site:** [brain-whetstone.fun](https://brain-whetstone.fun)
 
-Everything runs on Cloudflare's free plan. Emails are sent with Resend.
+![Morning Whetstone screenshot](docs/screenshot.png)
 
-## What's in the folder
+## Why I built it
 
-| Path | What it is |
+AI tools now draft my writing, summarise my reading and help me make decisions. That's useful, but I noticed I was reaching for them before thinking things through myself. Morning Whetstone is a small daily habit to push back on that: one question, ten minutes, no searching, before the day starts.
+
+## Features
+
+- **Question of the day.** Everyone gets the same question each day, chosen from a bank of 287.
+- **Nine themes.** Mental maths, logic puzzles, memory and recall, explain it yourself, arguing both sides, writing under constraints, pattern spotting, word play and real-world problems. Pick a theme, or randomise.
+- **10-minute timer** with a soft chime, and space to write out your working.
+- **Up to three hints**, revealed one at a time, then the answer. Revealing the answer early takes a second tap.
+- **Daily email at 7am UK time.** Sign up with an email address, confirm it, and the question arrives each morning. The email contains only the question, so the hints and answer stay on the site.
+- **Streak counter** to track consecutive mornings.
+- **Installable on a phone** like an app, and works offline after the first visit.
+- **Light and dark mode**, with a quiet, paper-like design inspired by Japanese and Scandinavian minimalism.
+
+## How it works
+
+```
+Browser ──► Cloudflare Worker ──► static site (HTML, CSS, JS)
+                │
+                ├── /api/subscribe ──► D1 database (subscribers) ──► Resend (confirmation email)
+                ├── /api/confirm
+                └── /api/unsubscribe
+Cron trigger (daily) ──► Worker ──► picks today's question ──► Resend (daily email)
+```
+
+| Part | Technology |
 |---|---|
-| `public/index.html` | The website |
-| `public/questions.js` | All 287 questions, and the question-of-the-day picker |
-| `src/worker.js` | Sign-up, confirm, unsubscribe and the daily send |
-| `schema.sql` | The subscriber table |
-| `wrangler.toml` | Settings: your site address, sender email, send times |
+| Hosting and backend | Cloudflare Workers, serving the site and a small API |
+| Database | Cloudflare D1 (SQLite), storing subscriber emails only |
+| Scheduling | Cloudflare cron triggers |
+| Email | Resend, with SPF, DKIM and DMARC on a custom domain |
+| Front end | Plain HTML, CSS and JavaScript, no framework |
+| Offline and install | Service worker and web app manifest |
 
-## Set it up (about 30 minutes, one time)
+### Design decisions
 
-You'll need: a computer with [Node.js](https://nodejs.org) installed, a free Cloudflare account, a free Resend account, and a domain name to send email from (around £10 a year; you can buy one through Cloudflare).
+- **One shared question per day.** Questions are shuffled once with a fixed seed, then picked by London date, so the site and the email always agree and every question appears before any repeats.
+- **7am all year round.** The cron runs at 05:00 and 06:00 UTC, and the Worker only sends on the run that falls at 7am London time. This handles the switch between GMT and BST.
+- **No duplicate emails.** Each subscriber's last-sent date is recorded, so a retried job can't send the same question twice.
+- **Double opt-in and easy unsubscribe.** People confirm their email before receiving anything. Every email has an unsubscribe link and supports one-click unsubscribe in Gmail and Apple Mail.
+- **Privacy.** Only the email address is stored. Streaks and progress live in the visitor's own browser.
+- **Spam protection.** The sign-up form has a hidden field that catches bots.
 
-**1. Install**
-Open a terminal in this folder and run:
-```
-npm install
-npx wrangler login
-```
+## How it was made
 
-**2. Create the subscriber database**
-```
-npx wrangler d1 create whetstone
-```
-Copy the `database_id` it prints into `wrangler.toml`. Then create the table:
-```
-npm run db:init
-```
+I built this with Claude, Anthropic's AI assistant. It's a deliberately honest irony: a tool against over-relying on AI, made with AI.
 
-**3. Set up email sending (Resend)**
-1. Sign up at resend.com.
-2. Domains → Add domain → follow the steps to add the DNS records (if your domain is on Cloudflare, Resend can add them for you).
-3. API Keys → Create API key. Then run this and paste the key when asked:
-```
-npx wrangler secret put RESEND_API_KEY
-```
-4. In `wrangler.toml`, set `FROM_EMAIL` to an address on that domain, e.g. `Morning Whetstone <question@yourdomain.com>`.
+**My part:** the idea; choosing and refining the question themes; the design direction; deciding the features (hints, timer, daily email); buying and configuring the domain, including the DNS records for email authentication; and deploying to Cloudflare with automatic deploys from GitHub.
 
-**4. Deploy**
-```
-npm run deploy
-```
-It prints your live address, like `https://morning-whetstone.yourname.workers.dev`. Put that in `SITE_URL` in `wrangler.toml` and run `npm run deploy` again.
+**Claude's part:** writing most of the code and drafting the question bank, which I reviewed.
 
-**5. Test it**
-Subscribe with your own email, click the confirm link, and the next 7am email will arrive. To see what's on the list:
+## Project structure
+
 ```
-npx wrangler d1 execute whetstone --remote --command "select email, confirmed, last_sent from subscribers"
+public/
+  index.html            the website
+  questions.js          question bank and question-of-the-day logic
+  sw.js                 offline support
+  manifest.webmanifest  phone install settings
+src/
+  worker.js             API, daily email job and email templates
+schema.sql              subscriber table
+wrangler.toml           Cloudflare configuration
 ```
 
-**Optional: your own domain for the site.** In Cloudflare, open the worker → Settings → Domains & Routes → add e.g. `whetstone.yourdomain.com`, then update `SITE_URL`.
+## Run your own copy
 
-## Running it on your computer
+<details>
+<summary>Setup instructions</summary>
 
+**You'll need:** Node.js, a free Cloudflare account, a free Resend account, and a domain to send email from.
+
+1. **Install**
+   ```
+   npm install
+   npx wrangler login
+   ```
+2. **Create the database**
+   ```
+   npx wrangler d1 create whetstone
+   ```
+   Put the printed `database_id` into `wrangler.toml`, then run:
+   ```
+   npm run db:init
+   ```
+3. **Set up email**
+   - In Resend, add and verify your domain. If your DNS is on Cloudflare, set the email records to **DNS only** (grey cloud), not Proxied.
+   - Create an API key, then run:
+     ```
+     npx wrangler secret put RESEND_API_KEY
+     ```
+4. **Configure** `SITE_URL` and `FROM_EMAIL` in `wrangler.toml`.
+5. **Deploy**
+   ```
+   npm run deploy
+   ```
+   Then add your domain under the Worker's **Settings → Domains & Routes**.
+
+**Run locally**
 ```
 npm run db:init:local
 npm run dev
 ```
-Open http://localhost:8787. Emails won't send locally unless `RESEND_API_KEY` is set in a `.dev.vars` file.
 
-## Editing questions
-
-Edit `public/questions.js`. Each question looks like:
+**Edit questions** in `public/questions.js`. Each question looks like:
 ```js
 {q:"The question", h:["Hint 1","Hint 2","Hint 3"], a:"The answer"},
 ```
-Then `npm run deploy`. Note: adding questions changes the order of future questions of the day.
 
-## Limits and costs
+**Free plan limits:** Resend's free plan sends 100 emails a day, which covers about 100 subscribers.
 
-- **Cloudflare free plan**: plenty for this (100,000 requests a day).
-- **Resend free plan**: 3,000 emails a month and 100 a day, so about **100 subscribers**. Beyond that, the Pro plan is around $20 a month for 50,000 emails.
+</details>
 
-## Before you share it publicly
+## Ideas for later
 
-The UK GDPR and PECR apply to email lists. This setup already does the main things: people confirm their email before getting anything, and every email has an unsubscribe link. You should also add a short privacy note to the site saying what you store (just the email address), why, and who processes it (Cloudflare and Resend), plus a contact address.
+- A biology and bioinformatics theme
+- Difficulty levels
+- Streaks that follow you across devices
+- An archive of past questions
